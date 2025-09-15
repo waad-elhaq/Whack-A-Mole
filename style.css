@@ -269,3 +269,126 @@ body{
 #scoreBoard {
     animation: featherFloat 6s ease-in-out infinite;
 }
+
+/* Custom Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.popup-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.highscore-popup {
+    width: 35rem;
+    aspect-ratio: 1.14;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="350" viewBox="0 0 400 350"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23FFD700;stop-opacity:1" /><stop offset="100%" style="stop-color:%23FFA500;stop-opacity:1" /></linearGradient></defs><path d="M50,50 Q200,20 350,50 Q380,150 350,250 Q200,320 50,250 Q20,150 50,50 Z" fill="url(%23grad)" stroke="%23B8860B" stroke-width="5"/></svg>');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    padding: 40px 30px 100px;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'lilita one', sans-serif;
+}
+
+.highscore-title {
+    font-size: 3.3rem;
+    color: #8B4513;
+    text-shadow: 2px 2px 0 #FFD700, 
+                -2px -2px 0 #FFD700, 
+                2px -2px 0 #FFD700, 
+                -2px 2px 0 #FFD700;
+    margin-bottom: 10px;
+}
+
+.highscore-message {
+    font-size: 1.5rem;
+    color: #8B4513;
+    margin-bottom: 20px;
+}
+
+.highscore-input {
+    width: 70%;
+    padding: 12px 15px;
+    font-size: 2rem;
+    border: 3px solid #8B4513;
+    border-radius: 10px;
+    background-color: #FFF8DC;
+    color: #2a7c88ff;
+    font-family: 'Lilita One', sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+    outline: none;
+}
+
+.highscore-input:focus {
+    box-shadow: 0 0 10px #FFD700;
+}
+
+.submit-btn {
+    padding: 12px 30px;
+    font-size: 1.5rem;
+    background-color: #8B4513;
+    color: #FFD700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Lilita One', sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 0 #6B3100;
+}
+
+.submit-btn:hover {
+    background-color: #A0522D;
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 #6B3100;
+}
+
+.submit-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #6B3100;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-20px); }
+}
+
+.stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+    background-color: #FFD700;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: twinkle 2s infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}

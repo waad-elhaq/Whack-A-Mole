@@ -3,6 +3,10 @@ const startBtn = document.getElementById('start-btn');
 const playArea = document.getElementById('playing-area');
 const hsNumberElem = document.getElementById('highscore-number');
 const hsNameElem = document.getElementById('highscore-name');
+const highscoresBtn = document.getElementById('highscores-btn');
+const highscoresPanel = document.getElementById('highscores-panel');
+const highscoresList = document.getElementById('highscores-list');
+const closeHighscoresBtn = document.getElementById('close-highscores');
 const hammerHitImg = document.getElementById('hammer_hit_effect');
 const resetBtn = document.getElementById('reset-highscore-btn');
 const scoreDisplay = document.getElementById('score-display');
@@ -13,6 +17,7 @@ const lastScoreElem = document.getElementById('lastscore-number');
 let score = 0;
 let highScore = localStorage.getItem('wam_highscore') || 0;
 let highScoreName = localStorage.getItem('wam_highscore_name') || '---';
+let lastScore = localStorage.getItem('wam_lastscore') || 0;
 
 let oldInfo = document.getElementById('highscore-info');
 if (oldInfo) oldInfo.remove();
@@ -27,7 +32,7 @@ function updateLobbyHighScore() {
     let maxChars = 10;
     let nameLength = highScoreName.length || 1;
     let fontSize = Math.max(minFontSize, baseFontSize * (maxChars / nameLength));
-    fontSize = Math.min(fontSize, baseFontSize); // Don't go above base size
+    fontSize = Math.min(fontSize, baseFontSize); // bech l esm fel high score yekbr w yosghr hasb len(ch)
 
     hsNameElem.style.fontSize = fontSize + 'rem';
     hsNameElem.innerText = highScoreName;
@@ -52,14 +57,14 @@ startBtn.onclick = () => {
     scoreDisplay.innerText = `Score: ${score}`;
     scoreDisplay.style.display = 'block';
 
-    let timeLeft = 45;
+    let timeLeft = 5;
     countdownDisplay.innerText = `Time: ${timeLeft}s`;
     countdownDisplay.style.display = 'block';
 
     let holeCount = 3;
     const minDistanceX = 190;
     const minDistanceY = 120;
-    const delayTime = 2000;
+    let delayTime = 2000;
     let intervalId;
     let timerId;
 
@@ -90,11 +95,11 @@ startBtn.onclick = () => {
     }
 
     function resetInterval() {
+        delayTime = Math.max(900, 2000 - (score/3));
         clearInterval(intervalId);
         intervalId = setInterval(generateHoles, delayTime);
     }
 
-    // Mole type logic
 const MOLE_TYPES = ['generic', 'prank', 'bomb', 'miner'];
 const MOLE_IMAGES = {
     generic: 'genericMole.png',
@@ -105,27 +110,20 @@ const MOLE_IMAGES = {
 let moleHistory = [];
 
 function getNextMoleType(holeIndex, round) {
-    // Example tactics:
-    // - Mostly generic moles
-    // - Sometimes repeat generic in same hole, then prank
-    // - Sometimes bomb after a streak
-    // - Sometimes miner after a bomb
-    // - Never two bombs in a row
-    // - Prank after two generics in same hole
-    // - More special moles as score increases
+    //l algo hedha ybadel l mole b tarika smart
     const last = moleHistory[moleHistory.length - 1] || [];
     const prevType = last[holeIndex] || 'generic';
     const prev2 = moleHistory.length > 1 ? moleHistory[moleHistory.length - 2][holeIndex] : null;
-    // Increase special mole chance as score increases
+    // moles chance
     let prankChance = Math.min(0.1 + score / 3000, 0.25);
     let bombChance = Math.min(0.05 + score / 5000, 0.15);
     let minerChance = Math.min(0.05 + score / 4000, 0.15);
-    // Tactics
+    // Tactiques
     if (prevType === 'generic' && prev2 === 'generic' && Math.random() < 0.7) return 'prank';
     if (prevType === 'prank' && Math.random() < 0.3) return 'bomb';
     if (prevType === 'bomb' && Math.random() < 0.5) return 'miner';
     if (prevType === 'bomb') return 'generic'; // never two bombs in a row
-    // Random chance for special moles
+    // Random chance l special moles
     let r = Math.random();
     if (r < bombChance) return 'bomb';
     if (r < bombChance + prankChance) return 'prank';
@@ -138,21 +136,26 @@ function getNextMoleType(holeIndex, round) {
         playArea.innerHTML = '';
         const positions = [];
         const holeTemplate = document.getElementById('hole-template');
-        // Store holes with their y for sorting
+        // li aandha y akber tji mn kodem z index akber (more realistic)
         const holesWithY = [];
         let thisRoundTypes = [];
+        
+        playArea.refreshScheduled = false;
+        
         for (let i = 0; i < holeCount; i++) {
             const pos = randomPosition(positions);
             positions.push(pos);
-            // Decide mole type for this hole
+            
+            // mole selection
             const moleType = getNextMoleType(i, moleHistory.length);
             thisRoundTypes[i] = moleType;
-            // Clone the template for the hole
+            
             const hole = holeTemplate.content.firstElementChild.cloneNode(true);
             hole.style.left = `${pos.x}px`;
             hole.style.top = `${pos.y}px`;
             hole.dataset.y = pos.y;
-            // Animate the mole pop
+            
+            // Mole animation
             const mole = hole.querySelector('.mole');
             if (mole) {
                 mole.style.backgroundImage = `url('${MOLE_IMAGES[moleType]}')`;
@@ -161,30 +164,34 @@ function getNextMoleType(holeIndex, round) {
                 } else {
                     mole.classList.remove('prank-mole');
                 }
+                
                 setTimeout(() => {
                     mole.classList.add('pop');
-                }, 50); // slight delay for transition
+                }, 50);
             }
+            
             hole.onclick = (e) => {
-                // Special mole logic
-                if (moleType === 'miner') return; // miner can't be hit
+                if (moleType === 'miner') return;
+                
                 let delta = 0;
                 if (moleType === 'generic') delta = 100;
                 if (moleType === 'prank') delta = -50;
                 if (moleType === 'bomb') delta = -100;
+                
                 score += delta;
                 scoreDisplay.innerText = `Score: ${score}`;
+                
                 if (score < 0) {
                     scoreDisplay.style.color = '#ff2222';
                 } else {
                     scoreDisplay.style.color = '#fff';
                 }
-                // Change mole image based on type
+                
                 const mole = hole.querySelector('.mole');
-                // Remove all explosion classes first
                 if (mole) {
                     mole.classList.remove('bomb-explosion', 'prank-explosion');
                 }
+                
                 if (moleType === 'generic' && mole) {
                     mole.style.backgroundImage = "url('xeyedMole.png')";
                 } else if (moleType === 'bomb' && mole) {
@@ -194,7 +201,8 @@ function getNextMoleType(holeIndex, round) {
                     mole.style.backgroundImage = "url('prankExplosion.gif')";
                     mole.classList.add('prank-explosion');
                 }
-                // hammer hit effect with animation (not for miner)
+                
+                // Hammer hit effect animation
                 if (moleType !== 'miner') {
                     const rect = playArea.getBoundingClientRect();
                     hammerHitImg.style.left = (rect.left + pos.x + 60) + 'px';
@@ -204,27 +212,40 @@ function getNextMoleType(holeIndex, round) {
                     hammerHitImg.style.transform = 'rotate(0deg)';
                     void hammerHitImg.offsetWidth;
                     hammerHitImg.style.transform = 'rotate(-60deg)';
+                    
+                    //taamel refresh ken ala awel hit
+                    if (!playArea.refreshScheduled) {
+                        playArea.refreshScheduled = true;
+                        
+                        setTimeout(() => {
+                            if (mole) {
+                                mole.style.backgroundImage = `url('${MOLE_IMAGES[moleType]}')`;
+                            }
+                            hammerHitImg.style.display = 'none';
+                            hammerHitImg.style.transform = 'rotate(0deg)';
+                            
+                            generateHoles();
+                            resetInterval();
+                        }, 350);
+                    } else {
+                        setTimeout(() => {
+                            if (mole) {
+                                mole.style.backgroundImage = `url('${MOLE_IMAGES[moleType]}')`;
+                            }
+                        }, 350);
+                    }
                 }
-                setTimeout(() => {
-                    if (mole) {
-                        mole.style.backgroundImage = `url('${MOLE_IMAGES[moleType]}')`;
-                    }
-                    if (moleType !== 'miner') {
-                        hammerHitImg.style.display = 'none';
-                        hammerHitImg.style.transform = 'rotate(0deg)';
-                        generateHoles();
-                        resetInterval();
-                    }
-                }, 350);
             };
+            
             holesWithY.push({hole, y: pos.y});
         }
+        
         moleHistory.push(thisRoundTypes);
-        if (moleHistory.length > 10) moleHistory.shift(); // keep history short
-        // Sort holes by y ascending, then append with increasing z-index
+        if (moleHistory.length > 10) moleHistory.shift();
+        
         holesWithY.sort((a, b) => a.y - b.y);
         holesWithY.forEach((obj, idx) => {
-            obj.hole.style.zIndex = 10 + idx; // ensure zIndex increases with y
+            obj.hole.style.zIndex = 10 + idx;
             playArea.appendChild(obj.hole);
         });
     }
@@ -236,17 +257,15 @@ function getNextMoleType(holeIndex, round) {
         playArea.innerHTML = '';
         scoreDisplay.style.display = 'none';
         playArea.style.display = 'none';
-        lobby.style.display = 'flex';
+        
         if (lastScoreElem) lastScoreElem.innerText = score;
+        
         if (score > highScore) {
-            let name = prompt("Congratulations! New High Score!\nEnter your name:");
-            if (name && name.trim() !== "") {
-                highScore = score;
-                highScoreName = name.trim();
-                localStorage.setItem('wam_highscore', highScore);
-                localStorage.setItem('wam_highscore_name', highScoreName);
-            }
+            showHighScorePopup();
+        } else {
+            lobby.style.display = 'flex';
         }
+        
         updateLobbyHighScore();
     }
 
@@ -273,5 +292,71 @@ window.onload = () => {
     updateLobbyHighScore();
     scoreDisplay.style.display = 'none';
     countdownDisplay.style.display = 'none';
-    if (lastScoreElem) lastScoreElem.innerText = 0;
+    updateLastScoreDisplay();
+    updateHighScoresList();
 };
+
+function updateLastScoreDisplay() {
+    if (lastScoreElem) lastScoreElem.innerText = lastScore;
+}
+
+function updateLastScore(newScore) {
+    lastScore = newScore;
+    localStorage.setItem('wam_lastscore', lastScore);
+    updateLastScoreDisplay();
+}
+
+// stars effect
+function createStars() {
+    const container = document.getElementById('stars-container');
+    container.innerHTML = '';
+    for (let i = 0; i < 15; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = Math.random() * 20 + 10 + 'px';
+        star.style.height = star.style.width;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        container.appendChild(star);
+    }
+}
+
+// show high score popup
+function showHighScorePopup() {
+    const overlay = document.getElementById('highscore-popup-overlay');
+    overlay.classList.add('active');
+    document.getElementById('highscore-name-input').value = '';
+    document.getElementById('highscore-name-input').focus();
+    createStars();
+}
+
+// Hide high score popup
+function hideHighScorePopup() {
+    const overlay = document.getElementById('highscore-popup-overlay');
+    overlay.classList.remove('active');
+}
+
+document.getElementById('highscore-submit').addEventListener('click', function() {
+    const nameInput = document.getElementById('highscore-name-input');
+    const name = nameInput.value.trim();
+    
+    if (name !== "") {
+        highScore = score;
+        highScoreName = name;
+        localStorage.setItem('wam_highscore', highScore);
+        localStorage.setItem('wam_highscore_name', highScoreName);
+        hideHighScorePopup();
+        lobby.style.display = 'flex';
+        updateLobbyHighScore();
+    } else {
+        alert('Please enter your name!');
+        nameInput.focus();
+    }
+});
+
+document.getElementById('highscore-name-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('highscore-submit').click();
+    }
+});
