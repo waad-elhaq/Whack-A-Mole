@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/4157/4157474.png">
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack A Mole</title>
+</head>
+<body>
+    <div id="score-display">Score: 0</div>
+    <div id="countdown-display"></div>
+    <div id="lobby">
+        <img src="scoreBoard.png" alt="scoreBoard" id="scoreBoard">
+        <div class="lastscore">
+            <div id="lastscore-number">0</div>
+        </div>
+        <div class="highscore">
+            <div id="highscore-number"></div>
+            <div id="highscore-name"></div>
+        </div>
+        <button id="reset-highscore-btn">Reset</button>
+        <button id="start-btn">START</button>
+        <img src="dizzy stars.gif" alt="dizzy-stars" id="dizzy-stars1">
+        <img src="dizzy stars.gif" alt="dizzy-stars" id="dizzy-stars2">
+        <img src="hit.gif" alt="hammer_hit" id="hammer_hit">
+        <img src="sun.gif" alt="sun" id="sun">
+    </div>
+    <div id="playing-area"></div>
+    <img src="hammer.png" id="hammer_hit_effect" style="display:none;" alt="hammer-hit-effect">
+    <template id="hole-template">
+        <div class="hole">
+            <div class="mole"></div>
+            <div class="hole-edge"></div>
+        </div>
+    </template>
+</body>
+    <script src="script.js"></script>
+</html>
