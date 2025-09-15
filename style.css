@@ -392,3 +392,70 @@ body{
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }
 }
+
+/* New styles for high scores panel */
+#highscores-btn {
+    position: absolute;
+    top: 6.2rem;
+    right: 20.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    background: #fff8;
+    color: #2a7c88;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 20;
+    font-family: inherit;
+    box-shadow: 1px 1px 8px #2222;
+    transition: 0.3s ease;
+}
+
+#highscores-btn:hover {
+    background: #fff;
+    transform: rotate(90deg);
+}
+
+#highscores-panel {
+    font-family: inherit;
+    position: absolute;
+    top: 10rem;
+    right: 3.2rem;
+    width: 19.9rem;
+    background: #3E1A00;
+    border-radius: 10px;
+    padding: 35px 15px 15px 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 30;
+    display: none;
+}
+
+.highscore-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    background: rgba(251, 193, 33, 0.2);
+    border-radius: 5px;
+    font-size: 1.5rem;
+}
+
+.highscore-name {
+    color: #83cfdb;
+}
+
+.highscore-value {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+#close-highscores {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #a33;
+}

@@ -16,6 +16,7 @@ const lastScoreElem = document.getElementById('lastscore-number');
 
 let score = 0;
 let highScore = localStorage.getItem('wam_highscore') || 0;
+let highScores = JSON.parse(localStorage.getItem('wam_highscores')) || [];
 let highScoreName = localStorage.getItem('wam_highscore_name') || '---';
 let lastScore = localStorage.getItem('wam_lastscore') || 0;
 
@@ -41,12 +42,15 @@ updateLobbyHighScore();
 
 //reset
 resetBtn.onclick = () => {
-    if (confirm('Are you sure you want to reset the high score?')) {
+    if (confirm('Are you sure you want to reset all scores?')) {
         highScore = 0;
         highScoreName = '---';
+        highScores = [];
         localStorage.setItem('wam_highscore', highScore);
         localStorage.setItem('wam_highscore_name', highScoreName);
+        localStorage.setItem('wam_highscores', JSON.stringify(highScores));
         updateLobbyHighScore();
+        updateHighScoresList();
     }
 };
 
@@ -260,13 +264,32 @@ function getNextMoleType(holeIndex, round) {
         
         if (lastScoreElem) lastScoreElem.innerText = score;
         
-        if (score > highScore) {
-            showHighScorePopup();
+        // Update high scores
+        if (score > 0) {
+            // Add to high scores array
+            highScores.push({name: highScoreName, score: score});
+            
+            // Sort and keep top 10
+            highScores.sort((a, b) => b.score - a.score);
+            if (highScores.length > 10) {
+                highScores = highScores.slice(0, 10);
+            }
+            
+            // Update localStorage
+            localStorage.setItem('wam_highscores', JSON.stringify(highScores));
+            
+            // Update top high score if needed
+            if (score > highScore) {
+                showHighScorePopup();
+            } else {
+                lobby.style.display = 'flex';
+            }
         } else {
             lobby.style.display = 'flex';
         }
         
         updateLobbyHighScore();
+        updateHighScoresList();
     }
 
     intervalId = setInterval(generateHoles, delayTime);
@@ -346,9 +369,19 @@ document.getElementById('highscore-submit').addEventListener('click', function()
         highScoreName = name;
         localStorage.setItem('wam_highscore', highScore);
         localStorage.setItem('wam_highscore_name', highScoreName);
+        
+        // Update high scores array
+        highScores.push({name: name, score: score});
+        highScores.sort((a, b) => b.score - a.score);
+        if (highScores.length > 10) {
+            highScores = highScores.slice(0, 10);
+        }
+        localStorage.setItem('wam_highscores', JSON.stringify(highScores));
+        
         hideHighScorePopup();
         lobby.style.display = 'flex';
         updateLobbyHighScore();
+        updateHighScoresList();
     } else {
         alert('Please enter your name!');
         nameInput.focus();
@@ -359,4 +392,40 @@ document.getElementById('highscore-name-input').addEventListener('keypress', fun
     if (e.key === 'Enter') {
         document.getElementById('highscore-submit').click();
     }
+});
+
+// Update high scores list display
+function updateHighScoresList() {
+    highscoresList.innerHTML = '';
+    
+    if (highScores.length === 0) {
+        highscoresList.innerHTML = '<div style="text-align: center; padding: 10px;">No scores yet!</div>';
+        return;
+    }
+    
+    // Sort scores from highest to lowest
+    highScores.sort((a, b) => b.score - a.score);
+    
+    // Display top 7 scores
+    const displayScores = highScores.slice(0, 7);
+    
+    displayScores.forEach((item, index) => {
+        const scoreItem = document.createElement('div');
+        scoreItem.className = 'highscore-item';
+        scoreItem.innerHTML = `
+            <span class="highscore-name">${item.name}</span>
+            <span class="highscore-value">${item.score}</span>
+        `;
+        highscoresList.appendChild(scoreItem);
+    });
+}
+
+// Toggle high scores panel
+highscoresBtn.addEventListener('click', () => {
+    updateHighScoresList();
+    highscoresPanel.style.display = 'block';
+});
+
+closeHighscoresBtn.addEventListener('click', () => {
+    highscoresPanel.style.display = 'none';
 });
