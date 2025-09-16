@@ -254,6 +254,8 @@ function getNextMoleType(holeIndex, round) {
         });
     }
 
+    let currentTopScore = 0;
+
     function endGame() {
         clearInterval(intervalId);
         clearInterval(timerId);
@@ -263,23 +265,25 @@ function getNextMoleType(holeIndex, round) {
         playArea.style.display = 'none';
         
         if (lastScoreElem) lastScoreElem.innerText = score;
+        updateLastScore(score);
         
-        // Update high scores
         if (score > 0) {
-            // Add to high scores array
-            highScores.push({name: highScoreName, score: score});
+            // Check if score is in top 5
+            let isTop5 = false;
+            let minTop5Score = 0;
             
-            // Sort and keep top 10
-            highScores.sort((a, b) => b.score - a.score);
-            if (highScores.length > 10) {
-                highScores = highScores.slice(0, 10);
+            if (highScores.length < 5) {
+                isTop5 = true;
+            } else {
+                // Find the minimum score in top 5
+                minTop5Score = highScores[highScores.length - 1].score;
+                if (score > minTop5Score) {
+                    isTop5 = true;
+                }
             }
             
-            // Update localStorage
-            localStorage.setItem('wam_highscores', JSON.stringify(highScores));
-            
-            // Update top high score if needed
-            if (score > highScore) {
+            if (isTop5) {
+                currentTopScore = score;
                 showHighScorePopup();
             } else {
                 lobby.style.display = 'flex';
@@ -290,6 +294,7 @@ function getNextMoleType(holeIndex, round) {
         
         updateLobbyHighScore();
         updateHighScoresList();
+        highscoresPanel.style.display = 'none';
     }
 
     intervalId = setInterval(generateHoles, delayTime);
@@ -360,37 +365,70 @@ function hideHighScorePopup() {
     overlay.classList.remove('active');
 }
 
-document.getElementById('highscore-submit').addEventListener('click', function() {
-    const nameInput = document.getElementById('highscore-name-input');
-    const name = nameInput.value.trim();
-    
-    if (name !== "") {
-        highScore = score;
-        highScoreName = name;
-        localStorage.setItem('wam_highscore', highScore);
-        localStorage.setItem('wam_highscore_name', highScoreName);
-        
-        // Update high scores array
-        highScores.push({name: name, score: score});
-        highScores.sort((a, b) => b.score - a.score);
-        if (highScores.length > 10) {
-            highScores = highScores.slice(0, 10);
-        }
-        localStorage.setItem('wam_highscores', JSON.stringify(highScores));
-        
-        hideHighScorePopup();
-        lobby.style.display = 'flex';
-        updateLobbyHighScore();
-        updateHighScoresList();
-    } else {
-        alert('Please enter your name!');
-        nameInput.focus();
-    }
-});
+// Wait for DOM to be fully loaded before attaching event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // High score submission event listener
+    const submitButton = document.getElementById('highscore-submit');
+    if (submitButton) {
+        submitButton.addEventListener('click', function() {
+            const nameInput = document.getElementById('highscore-name-input');
+            const name = nameInput.value.trim();
+            const popup = document.querySelector('.highscore-popup');
+            
+            if (name !== "") {
+                highScores.push({name: name, score: currentTopScore});
+                
+                highScores.sort((a, b) => b.score - a.score);
+                
+                // top 5
+                if (highScores.length > 5) {
+                    highScores = highScores.slice(0, 5);
+                }
 
-document.getElementById('highscore-name-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        document.getElementById('highscore-submit').click();
+                if (currentTopScore > highScore) {
+                    highScore = currentTopScore;
+                    highScoreName = name;
+                    localStorage.setItem('wam_highscore', highScore);
+                    localStorage.setItem('wam_highscore_name', highScoreName);
+                }
+                
+                localStorage.setItem('wam_highscores', JSON.stringify(highScores));
+                
+                hideHighScorePopup();
+                lobby.style.display = 'flex';
+                updateLobbyHighScore();
+                updateHighScoresList();
+            } else {
+                popup.classList.add('shake');
+                setTimeout(() => {
+                    popup.classList.remove('shake');
+                }, 500);
+                nameInput.focus();
+            }
+        });
+    } else {
+        console.error('Submit button not found!');
+    }
+
+    // Enter key event listener for high score input
+    const nameInput = document.getElementById('highscore-name-input');
+    if (nameInput) {
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const name = nameInput.value.trim();
+                const popup = document.querySelector('.highscore-popup');
+                
+                if (name !== "") {
+                    document.getElementById('highscore-submit').click();
+                } else {
+                    popup.classList.add('shake');
+                    setTimeout(() => {
+                        popup.classList.remove('shake');
+                    }, 500);
+                    nameInput.focus();
+                }
+            }
+        });
     }
 });
 
@@ -399,20 +437,20 @@ function updateHighScoresList() {
     highscoresList.innerHTML = '';
     
     if (highScores.length === 0) {
-        highscoresList.innerHTML = '<div style="text-align: center; padding: 10px;">No scores yet!</div>';
+        highscoresList.innerHTML += '<div style="text-align: center; padding: 10px; color: #2a7c88ff; font-size: 2rem;">No scores yet!</div>';
         return;
     }
     
-    // Sort scores from highest to lowest
     highScores.sort((a, b) => b.score - a.score);
     
-    // Display top 7 scores
-    const displayScores = highScores.slice(0, 7);
+    //top 5
+    const displayScores = highScores.slice(0, 5);
     
     displayScores.forEach((item, index) => {
         const scoreItem = document.createElement('div');
         scoreItem.className = 'highscore-item';
         scoreItem.innerHTML = `
+            <span class="highscore-rank">${index + 1}.</span>
             <span class="highscore-name">${item.name}</span>
             <span class="highscore-value">${item.score}</span>
         `;

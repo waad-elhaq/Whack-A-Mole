@@ -393,17 +393,16 @@ body{
     50% { opacity: 1; }
 }
 
-/* New styles for high scores panel */
 #highscores-btn {
     position: absolute;
-    top: 6.2rem;
-    right: 20.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 1.2rem;
+    top: 4.4rem;
+    left: 41.25rem;
+    padding: 1.7rem 1rem;
+    font-size: 2rem;
     background: #fff8;
-    color: #2a7c88;
+    color: #fbc121ff;
     border: none;
-    border-radius: 10px;
+    border-radius: 0 10px 10px 0;
     cursor: pointer;
     z-index: 20;
     font-family: inherit;
@@ -412,8 +411,9 @@ body{
 }
 
 #highscores-btn:hover {
-    background: #fff;
-    transform: rotate(90deg);
+    background: #fbc121ff;
+    color: #fff;
+    padding: 1.7rem 2rem;
 }
 
 #highscores-panel {
@@ -424,7 +424,7 @@ body{
     width: 19.9rem;
     background: #3E1A00;
     border-radius: 10px;
-    padding: 35px 15px 15px 15px;
+    padding: 50px 15px 15px 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     z-index: 30;
     display: none;
@@ -432,7 +432,7 @@ body{
 
 .highscore-item {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
     margin-bottom: 8px;
     padding: 5px 10px;
     background: rgba(251, 193, 33, 0.2);
@@ -440,22 +440,44 @@ body{
     font-size: 1.5rem;
 }
 
+.highscore-rank {
+    color: #fbc121ff;
+    margin-right: 10px;
+    min-width: 30px;
+    text-align: right;
+}
+
 .highscore-name {
     color: #83cfdb;
+    flex-grow: 1;
+    text-align: left;
 }
 
 .highscore-value {
     color: #FFD700;
     font-weight: bold;
+    min-width: 60px;
+    text-align: right;
 }
 
 #close-highscores {
     position: absolute;
-    top: 5px;
+    top: 0;
     right: 10px;
     background: none;
     border: none;
-    font-size: 1.2rem;
+    font-size: 3rem;
     cursor: pointer;
     color: #a33;
+}
+
+/* shake if blank input */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
