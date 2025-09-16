@@ -419,7 +419,7 @@ body{
 #highscores-panel {
     font-family: inherit;
     position: absolute;
-    top: 10rem;
+    top: 11rem;
     right: 3.2rem;
     width: 19.9rem;
     background: #3E1A00;
@@ -480,4 +480,29 @@ body{
 
 .shake {
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+#lobbySound {
+    position: absolute;
+    bottom: 1%;
+    left: 9%;
+    padding: 1.05rem 1.05rem;
+    background: #fff8;
+    background-image: url(https://cdn-icons-png.flaticon.com/128/727/727240.png);
+    background-size: 1.3rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 1px 1px 8px #2222;
+    transition: 0.3s ease;
+    border: none;
+}
+
+#lobbySound.active{
+    background-image: url(https://cdn-icons-png.flaticon.com/128/727/727269.png);
+    background-size: 1.3rem;
+    background-position: center;
+    transition: 0.3s ease;
 }

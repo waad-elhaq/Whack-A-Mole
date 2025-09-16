@@ -13,6 +13,30 @@ const scoreDisplay = document.getElementById('score-display');
 const countdownDisplay = document.getElementById('countdown-display');
 const holes = document.querySelectorAll('.hole');
 const lastScoreElem = document.getElementById('lastscore-number');
+const lobbySoundBtn = document.getElementById('lobbySound');
+
+//sound effects
+const bgMusic = new Audio('lobby.wav');
+let lobbySound = 0;
+lobbySoundBtn.addEventListener("mousedown", () => {
+    if (lobbySound == 0){
+        lobbySoundBtn.classList.add("active");
+        bgMusic.play();
+        lobbySound = 1;
+    }
+    else{
+        lobbySoundBtn.classList.remove("active");
+        bgMusic.pause();
+        lobbySound = 0;
+    }
+});
+
+const hitGeneric = new Audio('hitGeneric.mp3');
+const yapping_mario = new Audio('yapping-mario.mp3');
+const bomb_explosion = new Audio('bomb-explosion.mp3');
+const niahaha = new Audio('niahaha.mp3');
+const countdownSound = new Audio('countdown.wav')
+const minerSound = new Audio('miner.wav')
 
 let score = 0;
 let highScore = localStorage.getItem('wam_highscore') || 0;
@@ -61,7 +85,7 @@ startBtn.onclick = () => {
     scoreDisplay.innerText = `Score: ${score}`;
     scoreDisplay.style.display = 'block';
 
-    let timeLeft = 5;
+    let timeLeft = 45;
     countdownDisplay.innerText = `Time: ${timeLeft}s`;
     countdownDisplay.style.display = 'block';
 
@@ -175,12 +199,28 @@ function getNextMoleType(holeIndex, round) {
             }
             
             hole.onclick = (e) => {
-                if (moleType === 'miner') return;
+                if (moleType === 'miner'){
+                    minerSound.currentTime = 0;
+                    minerSound.play();
+                    return;
+                }
                 
                 let delta = 0;
-                if (moleType === 'generic') delta = 100;
-                if (moleType === 'prank') delta = -50;
-                if (moleType === 'bomb') delta = -100;
+                if (moleType === 'generic'){
+                    delta = 100;
+                    hitGeneric.currentTime = 0;
+                    hitGeneric.play();
+                }
+                if (moleType === 'prank'){
+                    delta = -50;
+                    niahaha.currentTime = 0;
+                    niahaha.play();
+                }
+                if (moleType === 'bomb'){
+                    delta = -100;
+                    bomb_explosion.currentTime = 0;
+                    bomb_explosion.play();
+                }
                 
                 score += delta;
                 scoreDisplay.innerText = `Score: ${score}`;
@@ -305,6 +345,7 @@ function getNextMoleType(holeIndex, round) {
         countdownDisplay.innerText = `Time: ${timeLeft}s`;
         if (timeLeft <= 5) {
             countdownDisplay.style.color = '#ff2222';
+            countdownSound.play();
         } else {
             countdownDisplay.style.color = '#fff';
             countdownDisplay.style.textShadow = '1px 1px 4px #222';
@@ -365,7 +406,6 @@ function hideHighScorePopup() {
     overlay.classList.remove('active');
 }
 
-// Wait for DOM to be fully loaded before attaching event listeners
 document.addEventListener('DOMContentLoaded', function() {
     // High score submission event listener
     const submitButton = document.getElementById('highscore-submit');
@@ -380,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 highScores.sort((a, b) => b.score - a.score);
                 
-                // top 5
+                // Keep only top 5
                 if (highScores.length > 5) {
                     highScores = highScores.slice(0, 5);
                 }
@@ -396,18 +436,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 hideHighScorePopup();
                 lobby.style.display = 'flex';
+                countdownSound.pause();
                 updateLobbyHighScore();
                 updateHighScoresList();
             } else {
                 popup.classList.add('shake');
+                yapping_mario.play();
                 setTimeout(() => {
                     popup.classList.remove('shake');
                 }, 500);
                 nameInput.focus();
             }
         });
-    } else {
-        console.error('Submit button not found!');
     }
 
     // Enter key event listener for high score input
