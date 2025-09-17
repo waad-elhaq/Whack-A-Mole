@@ -14,6 +14,8 @@ const countdownDisplay = document.getElementById('countdown-display');
 const holes = document.querySelectorAll('.hole');
 const lastScoreElem = document.getElementById('lastscore-number');
 const lobbySoundBtn = document.getElementById('lobbySound');
+const submitButton = document.getElementById('highscore-submit');
+const nameInput = document.getElementById('highscore-name-input');
 
 //sound effects
 const bgMusic = new Audio('lobby.wav');
@@ -21,6 +23,7 @@ let lobbySound = 0;
 lobbySoundBtn.addEventListener("mousedown", () => {
     if (lobbySound == 0){
         lobbySoundBtn.classList.add("active");
+        bgMusic.loop = true;
         bgMusic.play();
         lobbySound = 1;
     }
@@ -75,6 +78,7 @@ resetBtn.onclick = () => {
         localStorage.setItem('wam_highscores', JSON.stringify(highScores));
         updateLobbyHighScore();
         updateHighScoresList();
+        closeHighscoresBtn.click();
     }
 };
 
@@ -123,7 +127,7 @@ startBtn.onclick = () => {
     }
 
     function resetInterval() {
-        delayTime = Math.max(900, 2000 - (score/3));
+        delayTime = Math.max(800, 2000 - ((score/3)+10*(45-timeLeft)));
         clearInterval(intervalId);
         intervalId = setInterval(generateHoles, delayTime);
     }
@@ -159,7 +163,7 @@ function getNextMoleType(holeIndex, round) {
     return 'generic';
 }
 
-    function generateHoles() {
+function generateHoles() {
         holeCount = Math.min(3 + Math.floor(score/501), 5);
         playArea.innerHTML = '';
         const positions = [];
@@ -212,12 +216,12 @@ function getNextMoleType(holeIndex, round) {
                     hitGeneric.play();
                 }
                 if (moleType === 'prank'){
-                    delta = -50;
+                    delta = -100;
                     niahaha.currentTime = 0;
                     niahaha.play();
                 }
                 if (moleType === 'bomb'){
-                    delta = -100;
+                    delta = -250;
                     bomb_explosion.currentTime = 0;
                     bomb_explosion.play();
                 }
@@ -270,7 +274,7 @@ function getNextMoleType(holeIndex, round) {
                             
                             generateHoles();
                             resetInterval();
-                        }, 350);
+                        }, 300);
                     } else {
                         setTimeout(() => {
                             if (mole) {
@@ -354,6 +358,69 @@ function getNextMoleType(holeIndex, round) {
             endGame();
         }
     }, 1000);
+    submitButton.addEventListener('click', function() {
+        const name = nameInput.value.trim();
+        const popup = document.querySelector('.highscore-popup');
+            
+        if (name !== "") {
+            // Add new score
+            highScores.push({name: name, score: currentTopScore});
+
+            // Sort by score
+            highScores.sort((a, b) => b.score - a.score);
+
+            // Remove duplicates
+            const uniqueScores = [];
+            const seenNames = new Set();
+
+            for (const scoreData of highScores) {
+                if (!seenNames.has(scoreData.name)) {
+                    seenNames.add(scoreData.name);
+                    uniqueScores.push(scoreData);
+                }
+            }
+
+            highScores = uniqueScores.slice(0, 5);
+
+            if (currentTopScore > highScore) {
+                highScore = currentTopScore;
+                highScoreName = name;
+                localStorage.setItem('wam_highscore', highScore);
+                localStorage.setItem('wam_highscore_name', highScoreName);
+            }
+            
+            localStorage.setItem('wam_highscores', JSON.stringify(highScores));
+            
+            hideHighScorePopup();
+            lobby.style.display = 'flex';
+            countdownSound.pause();
+            updateLobbyHighScore();
+            updateHighScoresList();
+        } else {
+            popup.classList.add('shake');
+            yapping_mario.play();
+            setTimeout(() => {
+                popup.classList.remove('shake');
+            }, 500);
+            nameInput.focus();
+        }
+    });
+    nameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const name = nameInput.value.trim();
+            const popup = document.querySelector('.highscore-popup');
+        
+            if (name !== "") {
+                document.getElementById('highscore-submit').click();
+            } else {
+                popup.classList.add('shake');
+                setTimeout(() => {
+                    popup.classList.remove('shake');
+                }, 500);
+                nameInput.focus();
+            }
+        }
+    });
 };
 
 
@@ -406,95 +473,60 @@ function hideHighScorePopup() {
     overlay.classList.remove('active');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // High score submission event listener
-    const submitButton = document.getElementById('highscore-submit');
-    if (submitButton) {
-        submitButton.addEventListener('click', function() {
-            const nameInput = document.getElementById('highscore-name-input');
-            const name = nameInput.value.trim();
-            const popup = document.querySelector('.highscore-popup');
-            
-            if (name !== "") {
-                highScores.push({name: name, score: currentTopScore});
-                
-                highScores.sort((a, b) => b.score - a.score);
-                
-                // Keep only top 5
-                if (highScores.length > 5) {
-                    highScores = highScores.slice(0, 5);
-                }
-
-                if (currentTopScore > highScore) {
-                    highScore = currentTopScore;
-                    highScoreName = name;
-                    localStorage.setItem('wam_highscore', highScore);
-                    localStorage.setItem('wam_highscore_name', highScoreName);
-                }
-                
-                localStorage.setItem('wam_highscores', JSON.stringify(highScores));
-                
-                hideHighScorePopup();
-                lobby.style.display = 'flex';
-                countdownSound.pause();
-                updateLobbyHighScore();
-                updateHighScoresList();
-            } else {
-                popup.classList.add('shake');
-                yapping_mario.play();
-                setTimeout(() => {
-                    popup.classList.remove('shake');
-                }, 500);
-                nameInput.focus();
-            }
-        });
-    }
-
-    // Enter key event listener for high score input
-    const nameInput = document.getElementById('highscore-name-input');
-    if (nameInput) {
-        nameInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const name = nameInput.value.trim();
-                const popup = document.querySelector('.highscore-popup');
-                
-                if (name !== "") {
-                    document.getElementById('highscore-submit').click();
-                } else {
-                    popup.classList.add('shake');
-                    setTimeout(() => {
-                        popup.classList.remove('shake');
-                    }, 500);
-                    nameInput.focus();
-                }
-            }
-        });
-    }
-});
-
-// Update high scores list display
 function updateHighScoresList() {
     highscoresList.innerHTML = '';
+
+    // Remove duplicates and keep only top 5 unique scores
+    const uniqueScores = [];
+    const seenScores = new Set();
     
-    if (highScores.length === 0) {
-        highscoresList.innerHTML += '<div style="text-align: center; padding: 10px; color: #2a7c88ff; font-size: 2rem;">No scores yet!</div>';
+    highScores.forEach(scoreData => {
+        const scoreKey = `${scoreData.name}-${scoreData.score}`;
+        if (!seenScores.has(scoreKey)) {
+            seenScores.add(scoreKey);
+            uniqueScores.push(scoreData);
+        }
+    });
+    
+    // Sort by score (descending) and take only top 5
+    const topScores = uniqueScores
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+    
+    // Update the stored high scores
+    highScores = topScores;
+    localStorage.setItem('wam_highscores', JSON.stringify(highScores));
+
+    if (topScores.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = 'No high scores yet!';
+        emptyMessage.style.color = '#fff';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.marginTop = '20px';
+        highscoresList.appendChild(emptyMessage);
         return;
     }
-    
-    highScores.sort((a, b) => b.score - a.score);
-    
-    //top 5
-    const displayScores = highScores.slice(0, 5);
-    
-    displayScores.forEach((item, index) => {
-        const scoreItem = document.createElement('div');
-        scoreItem.className = 'highscore-item';
-        scoreItem.innerHTML = `
-            <span class="highscore-rank">${index + 1}.</span>
-            <span class="highscore-name">${item.name}</span>
-            <span class="highscore-value">${item.score}</span>
-        `;
-        highscoresList.appendChild(scoreItem);
+
+    topScores.forEach((scoreData, index) => {
+        const item = document.createElement('div');
+        item.className = 'highscore-item';
+
+        const rank = document.createElement('span');
+        rank.className = 'highscore-rank';
+        rank.textContent = (index + 1) + '.';
+
+        const name = document.createElement('span');
+        name.className = 'highscore-name';
+        name.textContent = scoreData.name;
+
+        const score = document.createElement('span');
+        score.className = 'highscore-value';
+        score.textContent = scoreData.score;
+
+        item.appendChild(rank);
+        item.appendChild(name);
+        item.appendChild(score);
+        highscoresList.appendChild(item);
     });
 }
 

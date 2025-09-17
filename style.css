@@ -271,7 +271,7 @@ body{
 }
 
 /* Custom Popup Styles */
-.popup-overlay {
+#highscore-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -287,7 +287,7 @@ body{
     transition: opacity 0.3s ease;
 }
 
-.popup-overlay.active {
+#highscore-popup-overlay.active {
     opacity: 1;
     pointer-events: all;
 }
