@@ -8,6 +8,15 @@ body{
     overflow: hidden;
 }
 
+#cpu_logo{
+    position: absolute;
+    width: 11%;
+    top: 44.5%;
+    left: 0;
+    border-radius: 0 15px 15px 0;
+    z-index: 1000;
+}
+
 #lobby {
     position: fixed;
     top: 0;
